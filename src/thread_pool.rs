@@ -3,7 +3,7 @@ use state::{AtomicState, Lifecycle, CAPACITY};
 use two_lock_queue::{self as mpmc, SendError, SendTimeoutError, TrySendError, RecvTimeoutError};
 use num_cpus;
 
-use std::{thread, usize};
+use std::{fmt, thread, usize};
 use std::sync::{Arc, Mutex, Condvar};
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::Relaxed;
@@ -120,6 +120,33 @@ struct Inner<T> {
 
     // Configuration
     config: Config,
+}
+
+impl<T> Clone for ThreadPool<T> {
+    fn clone(&self) -> Self {
+        ThreadPool { inner: self.inner.clone() }
+    }
+}
+
+impl<T> Clone for Sender<T> {
+    fn clone(&self) -> Self {
+        Sender {
+            tx: self.tx.clone(),
+            inner: self.inner.clone(),
+        }
+    }
+}
+
+impl<T> fmt::Debug for ThreadPool<T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.debug_struct("ThreadPool").finish()
+    }
+}
+
+impl<T> fmt::Debug for Sender<T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.debug_struct("Sender").finish()
+    }
 }
 
 /// Tracks state associated with a worker thread
