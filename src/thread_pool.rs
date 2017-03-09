@@ -156,9 +156,6 @@ impl Builder {
     ///
     /// The number of threads to keep in the pool, even if they are idle.
     pub fn core_pool_size(mut self, val: usize) -> Self {
-        assert!(val >= 1, "at least one thread required");
-        assert!(val <= self.thread_pool.max_pool_size, "value cannot be greater than `max_pool_size`");
-
         self.thread_pool.core_pool_size = val;
         self
     }
@@ -167,8 +164,6 @@ impl Builder {
     ///
     /// The maximum number of threads to allow in the pool.
     pub fn max_pool_size(mut self, val: usize) -> Self {
-        assert!(val >= self.thread_pool.core_pool_size, "value must be greater or equal to `core_pool_size`");
-
         self.thread_pool.max_pool_size = val;
         self
     }
@@ -234,6 +229,13 @@ impl Builder {
 
     /// Build and return the configured thread pool
     pub fn build<T: Task>(self) -> (Sender<T>, ThreadPool<T>) {
+        assert!(self.thread_pool.core_pool_size >= 1, "at least one thread required");
+        assert!(self.thread_pool.core_pool_size <= self.thread_pool.max_pool_size,
+                "`core_pool_size` cannot be greater than `max_pool_size`");
+        assert!(self.thread_pool.max_pool_size >= self.thread_pool.core_pool_size,
+                "`max_pool_size` must be greater or equal to `core_pool_size`");
+
+
         // Create the work queue
         let (tx, rx) = mpmc::channel(self.work_queue_capacity);
 

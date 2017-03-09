@@ -61,6 +61,12 @@ fn two_thread_basic() {
 }
 
 #[test]
+fn num_cpus_plus_1() {
+    extern crate num_cpus;
+    ThreadPool::<Box<TaskBox>>::fixed_size(num_cpus::get() + 1);
+}
+
+#[test]
 fn two_threads_task_queue_up() {
     let (sender, _) = ThreadPool::fixed_size(2);
     let (tx, rx) = mpsc::sync_channel(0);
