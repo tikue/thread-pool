@@ -20,6 +20,7 @@ pub struct ThreadPool<T> {
 ///
 /// Provide detailed control over the properties and behavior of the thread
 /// pool.
+#[derive(Debug)]
 pub struct Builder {
     // Thread pool specific configuration values
     thread_pool: Config,
@@ -134,6 +135,25 @@ impl<T> Clone for Sender<T> {
             tx: self.tx.clone(),
             inner: self.inner.clone(),
         }
+    }
+}
+
+impl fmt::Debug for Config {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        const SOME: &'static &'static str = &"Some(_)";
+        const NONE: &'static &'static str = &"None";
+
+        fmt.debug_struct("ThreadPool")
+           .field("core_pool_size", &self.core_pool_size)
+           .field("core_pool_size", &self.core_pool_size)
+           .field("max_pool_size", &self.max_pool_size)
+           .field("keep_alive", &self.keep_alive)
+           .field("allow_core_thread_timeout", &self.allow_core_thread_timeout)
+           .field("name_prefix", &self.name_prefix)
+           .field("stack_size", &self.stack_size)
+           .field("after_start", if self.after_start.is_some() { SOME } else { NONE })
+           .field("before_stop", if self.before_stop.is_some() { SOME } else { NONE })
+           .finish()
     }
 }
 
